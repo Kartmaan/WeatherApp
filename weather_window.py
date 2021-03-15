@@ -30,6 +30,7 @@ class Ui_MainWindow(object):
         # LineEdit location
         self.loc_lineEdit = QtWidgets.QLineEdit(self.tab_location)
         self.loc_lineEdit.setGeometry(QtCore.QRect(120, 60, 301, 51))
+        self.loc_lineEdit.setText("Lyon")
         self.loc_lineEdit.setObjectName("loc_lineEdit")
 
         # Button search
@@ -65,6 +66,9 @@ class Ui_MainWindow(object):
         self.loc_combo = QtWidgets.QComboBox(self.loc_frame_choose)
         self.loc_combo.setGeometry(QtCore.QRect(10, 60, 301, 51))
         self.loc_combo.setObjectName("loc_combo")
+        font = QtGui.QFont()
+        font.setPointSize(13)
+        self.loc_combo.setFont(font)
 
         # Button OK
         self.loc_button_OK = QtWidgets.QPushButton(self.loc_frame_choose)
@@ -457,7 +461,7 @@ class Ui_MainWindow(object):
         
         # Label recap (on main tab)
         self.curr_label_recap = QtWidgets.QLabel(self.tab_current)
-        self.curr_label_recap.setGeometry(QtCore.QRect(10, 10, 371, 21))
+        self.curr_label_recap.setGeometry(QtCore.QRect(10, 10, 480, 21))
         font = QtGui.QFont()
         font.setPointSize(14)
         self.curr_label_recap.setFont(font)
