@@ -461,7 +461,7 @@ class Ui_MainWindow(object):
         
         # Label recap (on main tab)
         self.curr_label_recap = QtWidgets.QLabel(self.tab_current)
-        self.curr_label_recap.setGeometry(QtCore.QRect(10, 10, 480, 21))
+        self.curr_label_recap.setGeometry(QtCore.QRect(10, 10, 680, 21))
         font = QtGui.QFont()
         font.setPointSize(14)
         self.curr_label_recap.setFont(font)
