@@ -12,6 +12,7 @@ locDisplay = ""
 locUrl = ""
 unitTemp = "C"
 unitWind = "kmh"
+apiDefault : "1def0c78689f22035176fc71c68b106c"
 apiKey = "1def0c78689f22035176fc71c68b106c"
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -132,6 +133,95 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # ms 2,237
             return f"{round(wind * 2.237)} m/s"
     
+    def beaufort(self, wind):
+        if wind < 0.5:
+            number = 0
+            descr = "Calm"
+
+        elif wind >= 0.5 and wind <= 1.5:
+            number = 1
+            descr = "Light air"
+
+        elif wind >= 1.6 and wind <= 3.3:
+            number = 2
+            descr = "Light breeze"
+
+        elif wind >= 3.4 and wind <= 5.5:
+            number = 3
+            descr = "Gentle breeze"
+        
+        elif wind >= 5.6 and wind <= 7.9:
+            number = 4
+            descr = "Moderate breeze"
+        
+        elif wind >= 8 and wind <= 10.7:
+            number = 5
+            descr = "Fresh breeze"
+        
+        elif wind >= 10.8 and wind <= 13.8:
+            number = 6
+            descr = "Strong breeze"
+        
+        elif wind >= 13.9 and wind <= 17.1:
+            number = 7
+            descr = "High wind"
+        
+        elif wind >= 17.2 and wind <= 20.7:
+            number = 8
+            descr = "Gale"
+        
+        elif wind >= 20.8 and wind <= 24.4:
+            number = 9
+            descr = "Strong gale"
+        
+        elif wind >= 24.5 and wind <= 28.4:
+            number = 10
+            descr = "Storm"
+        
+        elif wind >= 28.5 and wind <= 32.6:
+            number = 11
+            descr = "Violent storm"
+        
+        elif wind >= 32.7:
+            number = 12
+            descr = "Hurricane"
+        
+        else :
+            number = "Error"
+            descr = "Error"
+        
+        return number, descr
+
+    def cardinal(self, deg):
+        if (deg >= 0 and deg <= 22) or (deg >= 338 and deg <= 360):
+            card = "North"
+
+        elif deg > 22 and deg <= 67:
+            card = "North-east"
+
+        elif deg > 67 and deg <= 112:
+            card = "East"
+
+        elif deg > 112 and deg <= 157:
+            card = "South-east"
+
+        elif deg > 157 and deg <= 203:
+            card = "South"
+
+        elif deg > 203 and deg <= 247:
+            card = "South-West"
+
+        elif deg > 247 and deg <= 292:
+            card = "West"
+
+        elif deg > 292 and deg <= 337:
+            card = "North-west"
+
+        else :
+            card = "ERROR"
+
+        return card
+
     def getIcon(self, id):
         icon = QImage()
         iconUrl = f"http://openweathermap.org/img/wn/{id}@2x.png"
@@ -139,6 +229,42 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         return QPixmap(icon)
     
+    def epochConv(self, epoch, mode = "hr"):
+        if mode == "hr":
+            out = datetime.fromtimestamp(epoch)
+            out = out.strftime("%H:%M")
+
+        if mode == "dt":
+            out = datetime.fromtimestamp(epoch)
+            out = out.strftime("%d/%m/%Y")
+        
+        if mode == "day":
+            out = datetime.fromtimestamp(epoch)
+            out = out.weekday()
+
+            if out == 0:
+                out = "Monday"
+            if out == 1:
+                out = "Tuesday"
+            if out == 2:
+                out = "Wednesday"
+            if out == 3:
+                out = "Thursday"
+            if out == 4:
+                out = "Friday"
+            if out == 5:
+                out = "Saturday"
+            if out == 6:
+                out = "Sunday"
+            
+            return out
+        
+        if mode == "all":
+            out = datetime.fromtimestamp(epoch)
+            out = out.strftime("%d/%m/%Y-%H:%M")
+        
+        return out
+
     def currentWeather(self):
 
         # - - - - Get json
@@ -147,14 +273,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         data = response.json()
         data = json.loads(response.text)
 
-        # - - - - Current time
-        today = datetime.now()
+        # - - - - - - - - Current time - - - - - - - -
+        """ today = datetime.now()
         date = today.strftime("%d/%m/%Y")
-        hour = today.strftime("%H:%M")
-        self.curr_label_recap.setText(f"{locDisplay} - {date} {hour}")
+        hour = today.strftime("%H:%M") """
+
+        epoch = data['dt']
+        tz = data['timezone']
+        date = datetime.fromtimestamp(epoch)
+        dt = date.strftime("%d/%m/%Y")
+        hr = date.strftime("%H:%M")
+
+        hrlt = epoch + tz - 3600
+        hrlt = datetime.fromtimestamp(hrlt)
+        hrlt = hrlt.strftime("%H:%M")
+
+        self.curr_label_recap.setText(f"{locDisplay} - {dt} {hr} (local time : {hrlt})")
 
 
-        # - - - - Temp frame
+        # - - - - - - - - Temp frame - - - - - - - -
         # Current temp
         temp = data['main']['temp']
         #temp = round(temp - 273.15)
@@ -175,9 +312,116 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Icon
         iconID = data['weather'][0]['icon']
         self.curr_icon_temp.setPixmap(self.getIcon(iconID))
-    
-    
+
+        # - - - - - - - - Wind frame - - - - - - - -
+        wind = self.windConv(data['wind']['speed'])
+        self.curr_label_wind_speed.setText(wind)
         
+        # Beaufort scale
+        bs = self.beaufort(round(data['wind']['speed'],1))
+        text = f"Beaufort scale : {str(bs[0])}/12\n{str(bs[1])}"
+        self.curr_label_wind_more.setText(text)
+
+        # Degree/cardinal
+        deg = data['wind']['deg']
+        card = self.cardinal(deg)
+        self.curr_label_wind_dir.setText(str(deg)+"°")
+        self.curr_label_wind_cardinal.setText(card)
+
+        # - - - - - - - - More info frame - - - - - - - -
+        # Press\Vis\Hum
+        press = data['main']['pressure']
+        vis = data['visibility']
+        hum = data['main']['humidity']
+        text = f"Pressure : {press} hPa\n\nVisibility : {vis} m\n\nHumidity : {hum}%"
+        self.curr_label_more_info_press.setText(text)
+
+        # Sunrise/Sunset
+        # To-Do : time zone 
+        sunrise = data['sys']['sunrise'] + tz - 3600
+        #print(sunrise)
+        #print(data['timezone'])
+        sunrise = datetime.fromtimestamp(sunrise)
+        sunrise = sunrise.strftime("%H:%M")
+
+        sunset = data['sys']['sunset'] + tz - 3600
+        sunset = datetime.fromtimestamp(sunset)
+        sunset = sunset.strftime("%H:%M")
+
+        text = f"Sunrise : {sunrise}\n\nSunset : {sunset}"
+        self.curr_label_sun.setText(text)
+
+        # - - - - - - - - Next hours frame - - - - - - - -
+        # To-Do : If the icon ID is the same as the previous hour, 
+        # there is no need to request the API
+        lat = data['coord']['lat']
+        lon = data['coord']['lon']
+        url = f"https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude=minutely,daily&appid={apiKey}"
+        response = requests.get(url)
+        data = json.loads(response.text)
+
+        # - - - H+1
+        hr = self.epochConv(data['hourly'][1]['dt'])
+        iconID = data['hourly'][1]['weather'][0]['icon']
+        temp = self.tempConv(data['hourly'][1]['temp'])
+        wind = self.windConv(data['hourly'][1]['wind_speed'])
+
+        self.curr_label_h1.setText(hr)
+        self.curr_icon_h1.setPixmap(self.getIcon(iconID))
+        self.curr_label_h1_info.setText(f"{temp}\n{wind}")
+
+        # - - - H+2
+        hr = self.epochConv(data['hourly'][2]['dt'])
+        iconID = data['hourly'][2]['weather'][0]['icon']
+        temp = self.tempConv(data['hourly'][2]['temp'])
+        wind = self.windConv(data['hourly'][2]['wind_speed'])
+
+        self.curr_label_h2.setText(hr)
+        self.curr_icon_h2.setPixmap(self.getIcon(iconID))
+        self.curr_label_h2_info.setText(f"{temp}\n{wind}")
+
+        # - - - H+3
+        hr = self.epochConv(data['hourly'][3]['dt'])
+        iconID = data['hourly'][3]['weather'][0]['icon']
+        temp = self.tempConv(data['hourly'][3]['temp'])
+        wind = self.windConv(data['hourly'][3]['wind_speed'])
+
+        self.curr_label_h3.setText(hr)
+        self.curr_icon_h3.setPixmap(self.getIcon(iconID))
+        self.curr_label_h3_info.setText(f"{temp}\n{wind}")
+
+        # - - - H+4
+        hr = self.epochConv(data['hourly'][4]['dt'])
+        iconID = data['hourly'][4]['weather'][0]['icon']
+        temp = self.tempConv(data['hourly'][4]['temp'])
+        wind = self.windConv(data['hourly'][4]['wind_speed'])
+
+        self.curr_label_h4.setText(hr)
+        self.curr_icon_h4.setPixmap(self.getIcon(iconID))
+        self.curr_label_h4_info.setText(f"{temp}\n{wind}")
+
+        # - - - H+5
+        hr = self.epochConv(data['hourly'][5]['dt'])
+        iconID = data['hourly'][5]['weather'][0]['icon']
+        temp = self.tempConv(data['hourly'][5]['temp'])
+        wind = self.windConv(data['hourly'][5]['wind_speed'])
+
+        self.curr_label_h5.setText(hr)
+        self.curr_icon_h5.setPixmap(self.getIcon(iconID))
+        self.curr_label_h5_info.setText(f"{temp}\n{wind}")
+
+        # - - - H+6
+        hr = self.epochConv(data['hourly'][6]['dt'])
+        iconID = data['hourly'][6]['weather'][0]['icon']
+        temp = self.tempConv(data['hourly'][6]['temp'])
+        wind = self.windConv(data['hourly'][6]['wind_speed'])
+
+        self.curr_label_h6.setText(hr)
+        self.curr_icon_h6.setPixmap(self.getIcon(iconID))
+        self.curr_label_h6_info.setText(f"{temp}\n{wind}")       
+
+    def forecastWeather(self):
+        pass
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
