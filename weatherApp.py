@@ -12,8 +12,8 @@ locDisplay = ""
 locUrl = ""
 lat = ""
 lon = ""
-unitTemp = "C"
-unitWind = "kmh"
+unitTemp = "C" # "C", "F", "K"
+unitWind = "kmh" # "kmh", "ms", "mph"
 apiDefault : "1def0c78689f22035176fc71c68b106c"
 apiKey = "1def0c78689f22035176fc71c68b106c"
 
@@ -76,12 +76,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         locDisplay = loc
 
         loc = loc.split(",")
-        #print(len(loc))
-        #print(loc)
-
-        """ if len(loc) < 2 :
-            self.main_label_status.setText("NO MATCH")
-            return None """
 
         if len(loc) == 3 :
             name = loc[0].replace(" ","+")
@@ -115,27 +109,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tabHub.setCurrentIndex(1)
     
     def tempConv(self, temp):
+        #global unitTemp
+
         if unitTemp == "K":
             return f"{round(temp)}K"
 
         elif unitTemp == "C":
             return f"{round(temp - 273.15)}°C"
 
-        else :
+        else: # unitTemp == "F" :
             # (1 K − 273,15) × 9/5 + 32 = -457,9 °F
             F = (temp - 273.15) * 9/5 + 32
             return f"{round(F)}F"
     
     def windConv(self, wind):
+        #global unitWind
+
         if unitWind == "ms":
             return f"{round(wind)} m/s"
         
         elif unitWind == "kmh":
             return f"{round(wind * 3.6)} km/h"
         
-        else:
-            # ms 2,237
-            return f"{round(wind * 2.237)} m/s"
+        else: # unitWind == "mph":
+            return f"{round(wind * 2.237)} mph"
     
     def beaufort(self, wind):
         if wind < 0.5:
@@ -260,8 +257,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 out = "Saturday"
             if out == 6:
                 out = "Sunday"
-            
-            return out
         
         if mode == "all":
             out = datetime.fromtimestamp(epoch)
@@ -544,17 +539,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             unitTemp = "K"
         
         if self.opt_radio_kmh.isChecked():
-            unitTemp = "kmh"
+            unitWind = "kmh"
         if self.opt_radio_ms.isChecked():
-            unitTemp = "ms"
+            unitWind = "ms"
         if self.opt_radio_mph.isChecked():
-            unitTemp = "mph"
-        
+            unitWind = "mph"
+
         if locUrl != "":
             self.currentWeather()
             self.forecastWeather()
             self.tabHub.setCurrentIndex(1)
-        
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
