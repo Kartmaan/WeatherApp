@@ -10,6 +10,8 @@ from weather_window import Ui_MainWindow
 
 locDisplay = ""
 locUrl = ""
+lat = ""
+lon = ""
 unitTemp = "C"
 unitWind = "kmh"
 apiDefault : "1def0c78689f22035176fc71c68b106c"
@@ -24,6 +26,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.loc_button_search.clicked.connect(self.loc_input)
         self.loc_button_OK.clicked.connect(self.loc_validation)
+        self.opt_button_saveAll.clicked.connect(self.saveAll)
     
     def loc_input(self):
         """ Get the location input from user
@@ -108,6 +111,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #print(locUrl)
         
         self.currentWeather()
+        self.forecastWeather()
         self.tabHub.setCurrentIndex(1)
     
     def tempConv(self, temp):
@@ -267,6 +271,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def currentWeather(self):
 
+        global lat, lon
+
         # - - - - Get json
         url = f"https://api.openweathermap.org/data/2.5/weather?q={locUrl}&appid={apiKey}"
         response = requests.get(url)
@@ -421,7 +427,134 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.curr_label_h6_info.setText(f"{temp}\n{wind}")       
 
     def forecastWeather(self):
-        pass
+        url = f"https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude=minutely,hourly&appid={apiKey}"
+        response = requests.get(url)
+        data = json.loads(response.text)
+
+        # - - - Today
+        tempMin = self.tempConv(data['daily'][0]['temp']['min'])
+        tempMax = self.tempConv(data['daily'][0]['temp']['max'])
+        iconID = data['daily'][0]['weather'][0]['icon']
+        descr = data['daily'][0]['weather'][0]['description']
+
+        self.for_label_today_minTemp.setText(tempMin)
+        self.for_label_today_maxTemp.setText(tempMax)
+        self.for_label_today_descr.setText(descr)
+        self.for_icon_today.setPixmap(self.getIcon(iconID))
+
+        # - - - Day +1
+        day = self.epochConv(data['daily'][1]['dt'], "day")
+        tempMin = self.tempConv(data['daily'][1]['temp']['min'])
+        tempMax = self.tempConv(data['daily'][1]['temp']['max'])
+        iconID = data['daily'][1]['weather'][0]['icon']
+        descr = data['daily'][1]['weather'][0]['description']
+
+        self.for_label_d1.setText(day)
+        self.for_label_d1_minTemp.setText(tempMin)
+        self.for_label_d1_maxTemp.setText(tempMax)
+        self.for_label_d1_descr.setText(descr)
+        self.for_icon_d1.setPixmap(self.getIcon(iconID))
+
+        # - - - Day +2
+        day = self.epochConv(data['daily'][2]['dt'], "day")
+        tempMin = self.tempConv(data['daily'][2]['temp']['min'])
+        tempMax = self.tempConv(data['daily'][2]['temp']['max'])
+        iconID = data['daily'][2]['weather'][0]['icon']
+        descr = data['daily'][2]['weather'][0]['description']
+
+        self.for_label_d2.setText(day)
+        self.for_label_d2_minTemp.setText(tempMin)
+        self.for_label_d2_maxTemp.setText(tempMax)
+        self.for_label_d2_descr.setText(descr)
+        self.for_icon_d2.setPixmap(self.getIcon(iconID))
+
+        # - - - Day +3
+        day = self.epochConv(data['daily'][3]['dt'], "day")
+        tempMin = self.tempConv(data['daily'][3]['temp']['min'])
+        tempMax = self.tempConv(data['daily'][3]['temp']['max'])
+        iconID = data['daily'][3]['weather'][0]['icon']
+        descr = data['daily'][3]['weather'][0]['description']
+
+        self.for_label_d3.setText(day)
+        self.for_label_d3_minTemp.setText(tempMin)
+        self.for_label_d3_maxTemp.setText(tempMax)
+        self.for_label_d3_descr.setText(descr)
+        self.for_icon_d3.setPixmap(self.getIcon(iconID))
+
+        # - - - Day +4
+        day = self.epochConv(data['daily'][4]['dt'], "day")
+        tempMin = self.tempConv(data['daily'][4]['temp']['min'])
+        tempMax = self.tempConv(data['daily'][4]['temp']['max'])
+        iconID = data['daily'][4]['weather'][0]['icon']
+        descr = data['daily'][4]['weather'][0]['description']
+
+        self.for_label_d4.setText(day)
+        self.for_label_d4_minTemp.setText(tempMin)
+        self.for_label_d4_maxTemp.setText(tempMax)
+        self.for_label_d4_descr.setText(descr)
+        self.for_icon_d4.setPixmap(self.getIcon(iconID))
+
+        # - - - Day +5
+        day = self.epochConv(data['daily'][5]['dt'], "day")
+        tempMin = self.tempConv(data['daily'][5]['temp']['min'])
+        tempMax = self.tempConv(data['daily'][5]['temp']['max'])
+        iconID = data['daily'][5]['weather'][0]['icon']
+        descr = data['daily'][5]['weather'][0]['description']
+
+        self.for_label_d5.setText(day)
+        self.for_label_d5_minTemp.setText(tempMin)
+        self.for_label_d5_maxTemp.setText(tempMax)
+        self.for_label_d5_descr.setText(descr)
+        self.for_icon_d5.setPixmap(self.getIcon(iconID))
+
+        # - - - Day +6
+        day = self.epochConv(data['daily'][6]['dt'], "day")
+        tempMin = self.tempConv(data['daily'][6]['temp']['min'])
+        tempMax = self.tempConv(data['daily'][6]['temp']['max'])
+        iconID = data['daily'][6]['weather'][0]['icon']
+        descr = data['daily'][6]['weather'][0]['description']
+
+        self.for_label_d6.setText(day)
+        self.for_label_d6_minTemp.setText(tempMin)
+        self.for_label_d6_maxTemp.setText(tempMax)
+        self.for_label_d6_descr.setText(descr)
+        self.for_icon_d6.setPixmap(self.getIcon(iconID))
+
+        # - - - Day +7
+        day = self.epochConv(data['daily'][7]['dt'], "day")
+        tempMin = self.tempConv(data['daily'][7]['temp']['min'])
+        tempMax = self.tempConv(data['daily'][7]['temp']['max'])
+        iconID = data['daily'][7]['weather'][0]['icon']
+        descr = data['daily'][7]['weather'][0]['description']
+
+        self.for_label_d7.setText(day)
+        self.for_label_d7_minTemp.setText(tempMin)
+        self.for_label_d7_maxTemp.setText(tempMax)
+        self.for_label_d7_descr.setText(descr)
+        self.for_icon_d7.setPixmap(self.getIcon(iconID))
+
+    def saveAll(self):
+        global unitTemp, unitWind
+
+        if self.opt_radio_celcius.isChecked():
+            unitTemp = "C"
+        if self.opt_radio_farh.isChecked():
+            unitTemp = "F"
+        if self.opt_radio_kelvin.isChecked():
+            unitTemp = "K"
+        
+        if self.opt_radio_kmh.isChecked():
+            unitTemp = "kmh"
+        if self.opt_radio_ms.isChecked():
+            unitTemp = "ms"
+        if self.opt_radio_mph.isChecked():
+            unitTemp = "mph"
+        
+        if locUrl != "":
+            self.currentWeather()
+            self.forecastWeather()
+            self.tabHub.setCurrentIndex(1)
+        
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

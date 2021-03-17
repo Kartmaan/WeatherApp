@@ -30,7 +30,6 @@ class Ui_MainWindow(object):
         # LineEdit location
         self.loc_lineEdit = QtWidgets.QLineEdit(self.tab_location)
         self.loc_lineEdit.setGeometry(QtCore.QRect(120, 60, 301, 51))
-        self.loc_lineEdit.setText("Lyon")
         self.loc_lineEdit.setObjectName("loc_lineEdit")
 
         # Button search
@@ -39,12 +38,12 @@ class Ui_MainWindow(object):
         self.loc_button_search.setObjectName("loc_button_search")
 
         # Label searching...
-        self.loc_label_searching = QtWidgets.QLabel(self.tab_location)
+        """ self.loc_label_searching = QtWidgets.QLabel(self.tab_location)
         self.loc_label_searching.setGeometry(QtCore.QRect(760, 74, 81, 20))
         font = QtGui.QFont()
         font.setPointSize(11)
         self.loc_label_searching.setFont(font)
-        self.loc_label_searching.setObjectName("loc_label_searching")
+        self.loc_label_searching.setObjectName("loc_label_searching") """
 
         # Label Enter location
         self.loc_label_enter_location = QtWidgets.QLabel(self.tab_location)
@@ -85,13 +84,13 @@ class Ui_MainWindow(object):
         self.loc_label_choose_location.setObjectName("loc_label_choose_location")
 
         # Label getting...
-        self.loc_label_getting = QtWidgets.QLabel(self.loc_frame_choose)
+        """ self.loc_label_getting = QtWidgets.QLabel(self.loc_frame_choose)
         self.loc_label_getting.setGeometry(QtCore.QRect(280, 150, 81, 20))
         font = QtGui.QFont()
         font.setPointSize(11)
         self.loc_label_getting.setFont(font)
         self.loc_label_getting.setAlignment(QtCore.Qt.AlignCenter)
-        self.loc_label_getting.setObjectName("loc_label_getting")
+        self.loc_label_getting.setObjectName("loc_label_getting") """
 
         # Horizontal line
         self.loc_line = QtWidgets.QFrame(self.tab_location)
@@ -773,12 +772,12 @@ class Ui_MainWindow(object):
         self.for_label_d4_max.setObjectName("for_label_d4_max")
 
         # Label maximum temperature D+4
-        self.for_label_d4_maxMin = QtWidgets.QLabel(self.for_frame_d4)
-        self.for_label_d4_maxMin.setGeometry(QtCore.QRect(160, 49, 61, 41))
+        self.for_label_d4_maxTemp = QtWidgets.QLabel(self.for_frame_d4)
+        self.for_label_d4_maxTemp.setGeometry(QtCore.QRect(160, 49, 61, 41))
         font = QtGui.QFont()
         font.setPointSize(16)
-        self.for_label_d4_maxMin.setFont(font)
-        self.for_label_d4_maxMin.setObjectName("for_label_d4_maxMin")
+        self.for_label_d4_maxTemp.setFont(font)
+        self.for_label_d4_maxTemp.setObjectName("for_label_d4_maxMin")
         
         # Label D+4 description
         self.for_label_d4_descr = QtWidgets.QLabel(self.for_frame_d4)
@@ -1168,11 +1167,11 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Weather App"))
         self.loc_button_search.setText(_translate("MainWindow", "Search"))
-        self.loc_label_searching.setText(_translate("MainWindow", "Searching..."))
+        #self.loc_label_searching.setText(_translate("MainWindow", "Searching..."))
         self.loc_label_enter_location.setText(_translate("MainWindow", "Enter a location"))
         self.loc_button_OK.setText(_translate("MainWindow", "OK"))
         self.loc_label_choose_location.setText(_translate("MainWindow", "Choose a location"))
-        self.loc_label_getting.setText(_translate("MainWindow", "Getting..."))
+        #self.loc_label_getting.setText(_translate("MainWindow", "Getting..."))
         self.tabHub.setTabText(self.tabHub.indexOf(self.tab_location), _translate("MainWindow", "Location"))
         self.curr_label_temp.setText(_translate("MainWindow", "13°C"))
         self.curr_label_temp_title.setText(_translate("MainWindow", "Temperature"))
@@ -1244,7 +1243,7 @@ class Ui_MainWindow(object):
         self.for_label_d4_min.setText(_translate("MainWindow", "Min :"))
         self.for_label_d4_minTemp.setText(_translate("MainWindow", "3°C"))
         self.for_label_d4_max.setText(_translate("MainWindow", "Max :"))
-        self.for_label_d4_maxMin.setText(_translate("MainWindow", "11°C"))
+        self.for_label_d4_maxTemp.setText(_translate("MainWindow", "11°C"))
         self.for_label_d4_descr.setText(_translate("MainWindow", "Rain"))
         self.for_label_d5.setText(_translate("MainWindow", "Day +5"))
         self.for_label_d5_min.setText(_translate("MainWindow", "Min :"))
