@@ -10,6 +10,9 @@ from PyQt5.QtGui import QImage, QPixmap
 
 from weather_window import Ui_MainWindow
 
+__version__ = "1.0"
+__author__ = "Kartmaan"
+
 run = False
 t_init = 20*60
 cityName = ""
