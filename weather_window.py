@@ -1165,7 +1165,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Weather App"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "WhatsTheWeather"))
         self.loc_button_search.setText(_translate("MainWindow", "Search"))
         #self.loc_label_searching.setText(_translate("MainWindow", "Searching..."))
         self.loc_label_enter_location.setText(_translate("MainWindow", "Enter a location"))
@@ -1282,9 +1282,8 @@ class Ui_MainWindow(object):
         self.opt_label_countDown.setText(_translate("MainWindow", "Next refresh in : 00:00"))
         self.opt_button_saveAll.setText(_translate("MainWindow", "Save all"))
         self.tabHub.setTabText(self.tabHub.indexOf(self.tab_option), _translate("MainWindow", "Option"))
-        self.main_label_status.setText(_translate("MainWindow", "Status massage"))
-        self.main_label_title.setText(_translate("MainWindow", "Weather App"))
-
+        self.main_label_status.setText(_translate("MainWindow", ""))
+        self.main_label_title.setText(_translate("MainWindow", "WhatsTheWeather"))
 
 if __name__ == "__main__":
     import sys
