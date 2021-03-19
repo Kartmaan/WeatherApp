@@ -66,6 +66,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 		if code != 200 or len(data) == 0:
 			self.main_label_status.setText("NO MATCH")
+			self.loc_button_OK.setEnabled(False)
 			return None
 		else:
 			self.main_label_status.setText("")
@@ -624,10 +625,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 		self.thd_status = threading.Thread(target=self.statusDisplay, args=("save",))
 		self.thd_status.start()
-		#self.status("Saved")
-		#self.thd_status.join()
-
-		#self.main_label_status.setText("Preferences have been saved")
 
 		if locUrl != "":
 			""" self.currentWeather()

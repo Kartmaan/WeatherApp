@@ -1173,97 +1173,103 @@ class Ui_MainWindow(object):
         self.loc_label_choose_location.setText(_translate("MainWindow", "Choose a location"))
         #self.loc_label_getting.setText(_translate("MainWindow", "Getting..."))
         self.tabHub.setTabText(self.tabHub.indexOf(self.tab_location), _translate("MainWindow", "Location"))
-        self.curr_label_temp.setText(_translate("MainWindow", "13°C"))
+
+
+        self.curr_label_temp.setText(_translate("MainWindow", ".°C"))
         self.curr_label_temp_title.setText(_translate("MainWindow", "Temperature"))
-        self.curr_label_temp_more.setText(_translate("MainWindow", "Max temp : 14°C\n"
-"Min temp : 4°C\n"
-"Feels : 11°C"))
-        self.curr_label_temp_description.setText(_translate("MainWindow", "Clear sky"))
-        self.curr_label_wind_speed.setText(_translate("MainWindow", "14 km/h"))
+        self.curr_label_temp_more.setText(_translate("MainWindow", "Max temp : .°C\n"
+"Min temp : .°C\n"
+"Feels : .°C"))
+        self.curr_label_temp_description.setText(_translate("MainWindow", ". . ."))
+        self.curr_label_wind_speed.setText(_translate("MainWindow", ". km/h"))
         self.curr_label_wind_title.setText(_translate("MainWindow", "Wind"))
-        self.curr_label_wind_dir.setText(_translate("MainWindow", "340°"))
-        self.curr_label_wind_more.setText(_translate("MainWindow", "Beaufort scale : 3/12\n"
-"Light breeze"))
-        self.curr_label_wind_cardinal.setText(_translate("MainWindow", "North"))
+        self.curr_label_wind_dir.setText(_translate("MainWindow", ".°"))
+        self.curr_label_wind_more.setText(_translate("MainWindow", "Beaufort scale : ./12\n"
+"..."))
+        self.curr_label_wind_cardinal.setText(_translate("MainWindow", "..."))
         self.curr_label_more_title.setText(_translate("MainWindow", "More info"))
-        self.curr_label_more_info_press.setText(_translate("MainWindow", "Pressure : 1013 hP\n"
+        self.curr_label_more_info_press.setText(_translate("MainWindow", "Pressure : . hP\n"
 "\n"
-"Visibility : 3000 km\n"
+"Visibility : . km\n"
 "\n"
-"Humidity : 69%"))
-        self.curr_label_sun.setText(_translate("MainWindow", "Sunrise : 05:48\n"
+"Humidity : .%"))
+        self.curr_label_sun.setText(_translate("MainWindow", "Sunrise : 00:00\n"
 "\n"
-"Sunset : 19:45"))
+"Sunset : 00:00"))
         self.label_next_hours_title.setText(_translate("MainWindow", "Next hours"))
-        self.curr_label_h1.setText(_translate("MainWindow", "15:00"))
-        self.curr_label_h2.setText(_translate("MainWindow", "16:00"))
-        self.curr_label_h3.setText(_translate("MainWindow", "17:00"))
-        self.curr_label_h4.setText(_translate("MainWindow", "18:00"))
-        self.curr_label_h5.setText(_translate("MainWindow", "19:00"))
-        self.curr_label_h6.setText(_translate("MainWindow", "19:00"))
-        self.curr_label_h1_info.setText(_translate("MainWindow", "8°C\n"
-"12 km/h"))
-        self.curr_label_h2_info.setText(_translate("MainWindow", "9°C\n"
-"11 km/h"))
-        self.curr_label_h3_info.setText(_translate("MainWindow", "10°C\n"
-"13 km/h"))
-        self.curr_label_h4_info.setText(_translate("MainWindow", "9°C\n"
-"12 km/h"))
-        self.curr_label_h5_info.setText(_translate("MainWindow", "7°C\n"
-"12 km/h"))
-        self.curr_label_h6_info.setText(_translate("MainWindow", "6°C\n"
-"11 km/h"))
-        self.curr_label_recap.setText(_translate("MainWindow", "Lyon, FR - 08/03/2021 14:12"))
+        self.curr_label_h1.setText(_translate("MainWindow", "00:00"))
+        self.curr_label_h2.setText(_translate("MainWindow", "00:00"))
+        self.curr_label_h3.setText(_translate("MainWindow", "00:00"))
+        self.curr_label_h4.setText(_translate("MainWindow", "00:00"))
+        self.curr_label_h5.setText(_translate("MainWindow", "00:00"))
+        self.curr_label_h6.setText(_translate("MainWindow", "00:00"))
+        self.curr_label_h1_info.setText(_translate("MainWindow", ".°C\n"
+". km/h"))
+        self.curr_label_h2_info.setText(_translate("MainWindow", ".°C\n"
+". km/h"))
+        self.curr_label_h3_info.setText(_translate("MainWindow", ".°C\n"
+". km/h"))
+        self.curr_label_h4_info.setText(_translate("MainWindow", ".°C\n"
+". km/h"))
+        self.curr_label_h5_info.setText(_translate("MainWindow", ".°C\n"
+". km/h"))
+        self.curr_label_h6_info.setText(_translate("MainWindow", ".°C\n"
+". km/h"))
+        self.curr_label_recap.setText(_translate("MainWindow", ""))
         self.tabHub.setTabText(self.tabHub.indexOf(self.tab_current), _translate("MainWindow", "Current weather"))
+
+
         self.for_label_today.setText(_translate("MainWindow", "Today"))
         self.for_label_today_min.setText(_translate("MainWindow", "Min :"))
-        self.for_label_today_minTemp.setText(_translate("MainWindow", "3°C"))
+        self.for_label_today_minTemp.setText(_translate("MainWindow", ".°C"))
         self.for_label_today_max.setText(_translate("MainWindow", "Max :"))
-        self.for_label_today_maxTemp.setText(_translate("MainWindow", "11°C"))
-        self.for_label_today_descr.setText(_translate("MainWindow", "Rain"))
+        self.for_label_today_maxTemp.setText(_translate("MainWindow", ".°C"))
+        self.for_label_today_descr.setText(_translate("MainWindow", "..."))
         self.for_label_d1.setText(_translate("MainWindow", "Day +1"))
         self.for_label_d1_min.setText(_translate("MainWindow", "Min :"))
-        self.for_label_d1_minTemp.setText(_translate("MainWindow", "3°C"))
+        self.for_label_d1_minTemp.setText(_translate("MainWindow", ".°C"))
         self.for_label_d1_max.setText(_translate("MainWindow", "Max :"))
-        self.for_label_d1_maxTemp.setText(_translate("MainWindow", "11°C"))
-        self.for_label_d1_descr.setText(_translate("MainWindow", "Rain"))
+        self.for_label_d1_maxTemp.setText(_translate("MainWindow", "...°C"))
+        self.for_label_d1_descr.setText(_translate("MainWindow", "..."))
         self.for_label_d2.setText(_translate("MainWindow", "Day +2"))
         self.for_label_d2_min.setText(_translate("MainWindow", "Min :"))
-        self.for_label_d2_minTemp.setText(_translate("MainWindow", "3°C"))
+        self.for_label_d2_minTemp.setText(_translate("MainWindow", ".°C"))
         self.for_label_d2_max.setText(_translate("MainWindow", "Max :"))
-        self.for_label_d2_maxTemp.setText(_translate("MainWindow", "11°C"))
-        self.for_label_d2_descr.setText(_translate("MainWindow", "Rain"))
+        self.for_label_d2_maxTemp.setText(_translate("MainWindow", ".°C"))
+        self.for_label_d2_descr.setText(_translate("MainWindow", "..."))
         self.for_label_d3.setText(_translate("MainWindow", "Day +3"))
         self.for_label_d3_min.setText(_translate("MainWindow", "Min :"))
-        self.for_label_d3_minTemp.setText(_translate("MainWindow", "3°C"))
+        self.for_label_d3_minTemp.setText(_translate("MainWindow", ".°C"))
         self.for_label_d3_max.setText(_translate("MainWindow", "Max :"))
-        self.for_label_d3_maxTemp.setText(_translate("MainWindow", "11°C"))
-        self.for_label_d3_descr.setText(_translate("MainWindow", "Rain"))
+        self.for_label_d3_maxTemp.setText(_translate("MainWindow", ".°C"))
+        self.for_label_d3_descr.setText(_translate("MainWindow", "..."))
         self.for_label_d4.setText(_translate("MainWindow", "Day +4"))
         self.for_label_d4_min.setText(_translate("MainWindow", "Min :"))
-        self.for_label_d4_minTemp.setText(_translate("MainWindow", "3°C"))
+        self.for_label_d4_minTemp.setText(_translate("MainWindow", ".°C"))
         self.for_label_d4_max.setText(_translate("MainWindow", "Max :"))
-        self.for_label_d4_maxTemp.setText(_translate("MainWindow", "11°C"))
-        self.for_label_d4_descr.setText(_translate("MainWindow", "Rain"))
+        self.for_label_d4_maxTemp.setText(_translate("MainWindow", ".°C"))
+        self.for_label_d4_descr.setText(_translate("MainWindow", "."))
         self.for_label_d5.setText(_translate("MainWindow", "Day +5"))
         self.for_label_d5_min.setText(_translate("MainWindow", "Min :"))
-        self.for_label_d5_minTemp.setText(_translate("MainWindow", "3°C"))
+        self.for_label_d5_minTemp.setText(_translate("MainWindow", ".°C"))
         self.for_label_d5_max.setText(_translate("MainWindow", "Max :"))
-        self.for_label_d5_maxTemp.setText(_translate("MainWindow", "11°C"))
-        self.for_label_d5_descr.setText(_translate("MainWindow", "Rain"))
+        self.for_label_d5_maxTemp.setText(_translate("MainWindow", ".°C"))
+        self.for_label_d5_descr.setText(_translate("MainWindow", "..."))
         self.for_label_d6.setText(_translate("MainWindow", "Day +6"))
         self.for_label_d6_min.setText(_translate("MainWindow", "Min :"))
-        self.for_label_d6_minTemp.setText(_translate("MainWindow", "3°C"))
+        self.for_label_d6_minTemp.setText(_translate("MainWindow", ".°C"))
         self.for_label_d6_max.setText(_translate("MainWindow", "Max :"))
-        self.for_label_d6_maxTemp.setText(_translate("MainWindow", "11°C"))
-        self.for_label_d6_descr.setText(_translate("MainWindow", "Rain"))
+        self.for_label_d6_maxTemp.setText(_translate("MainWindow", ".°C"))
+        self.for_label_d6_descr.setText(_translate("MainWindow", "..."))
         self.for_label_d7.setText(_translate("MainWindow", "Day +7"))
         self.for_label_d7_min.setText(_translate("MainWindow", "Min :"))
-        self.for_label_d7_minTemp.setText(_translate("MainWindow", "3°C"))
+        self.for_label_d7_minTemp.setText(_translate("MainWindow", ".°C"))
         self.for_label_d7_max.setText(_translate("MainWindow", "Max :"))
-        self.for_label_d7_maxTemp.setText(_translate("MainWindow", "11°C"))
-        self.for_label_d7_descr.setText(_translate("MainWindow", "Rain"))
+        self.for_label_d7_maxTemp.setText(_translate("MainWindow", ".°C"))
+        self.for_label_d7_descr.setText(_translate("MainWindow", "..."))
         self.tabHub.setTabText(self.tabHub.indexOf(self.tab_forecast), _translate("MainWindow", "Forecast"))
+
+
         self.opt_lineEdit_api.setText(_translate("MainWindow", "1def0c78689f22035176fc71c68b106c"))
         self.opt_label_apiTitle.setText(_translate("MainWindow", "OpenWeatherMap\n"
 "API key :"))
