@@ -107,10 +107,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.thd_locValidation.start() 
 
 	def loc_validation(self):
-		""" 
+		""" Connect to 'OK' button
 		- Get the choice from comboBox 
 		- Format it to respect the syntax of the API URL
-		- Runs the wheather requests """
+		- Runs the weather requests """
 
 		global locDisplay, locUrl, cityName, run
 
@@ -673,9 +673,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.thd_status.start()
 
 		if locUrl != "":
-			""" self.currentWeather()
-			self.forecastWeather()
-			self.tabHub.setCurrentIndex(1) """
 			self.thd_weather = threading.Thread(target=self.getWeather)
 			self.thd_weather.start()
 
@@ -687,10 +684,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		"""Get the weather (current & forecast), with refresh"""
 		
 		t = t_init
-		
-		""" self.currentWeather()
-		self.forecastWeather()
-		self.tabHub.setCurrentIndex(1) """
 
 		while run:
 			while t and run:
@@ -715,7 +708,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 		self.thd_status = threading.Thread(target= self.statusDisplay, args=("get",))
 		self.thd_status.start()
-		#self.status("Getting. . .")
 
 		self.currentWeather()
 		self.forecastWeather()
@@ -724,7 +716,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def statusDisplay(self, flag):
 		"""Status messages display"""
 
-		t = 4
+		t = 3
 		
 		if flag == "save":
 			txt = "Preferences have been saved"
