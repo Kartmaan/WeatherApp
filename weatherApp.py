@@ -30,43 +30,52 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		super().__init__()
 		self.setupUi(self)
 
+		# - - - - Threads
+		# Updates the weather at regular time intervals
 		self.thd_refresh = threading.Thread(target=self.refresh)
+		# Displaying Status Messages
 		self.thd_status = threading.Thread(target=self.statusDisplay)
+		# Get the weather without refresh (just once)
 		self.thd_weather = threading.Thread(target=self.getWeather)
+		# Localisation validation
 		self.thd_locValidation = threading.Thread(target=self.loc_validation)
 
-		self.tabHub.setCurrentIndex(0)
-		self.loc_button_OK.setEnabled(False)
-		self.tab_current.setEnabled(False)
-		self.tab_forecast.setEnabled(False)
-
+		# - - - - Connection of buttons with their function
 		self.loc_button_search.clicked.connect(self.loc_output)
 		self.loc_button_OK.clicked.connect(self.buttonOK)
 		self.opt_button_saveAll.clicked.connect(self.saveAll)
 		self.opt_button_verify.clicked.connect(self.verify)
-	
-	def loc_output(self):
-		""" Fill the comboBox.
-		This function uses an API functionality to list city namesakes """ 
 
-		loc = self.loc_lineEdit.text()
+		# - - - - Widgets initialisation
+		self.tabHub.setCurrentIndex(0) # Display 1st tab first
+		self.loc_button_OK.setEnabled(False) # Button OK off
+		self.tab_current.setEnabled(False) # Current weather off
+		self.tab_forecast.setEnabled(False) # Forecast off
+
+	def loc_output(self):
+		""" Get location input and fill the comboBox.
+		This function runs when "search" button is pressed. """ 
+
+		self.loc_combo.clear() # Clear the comboBox
+		loc = self.loc_lineEdit.text() # Get input
+
+		# Formating
 		loc = loc.strip()
 		loc = loc.title()
 
+		# Input is empty
 		if len(loc) - loc.count(' ') == 0:
 			self.main_label_status.setText("Please insert a valid city name")
 			return None
 
-		self.loc_combo.clear()
-
+		# an API to list the names of homonymous towns
 		url = f"http://api.openweathermap.org/geo/1.0/direct?q={loc}&limit=5&appid={apiKey}"
 
 		response = requests.get(url)
 		data = json.loads(response.text)
 		code = response.status_code
-		print(code)
-		#print(data)
 
+		# URL check
 		if code != 200 or len(data) == 0:
 			self.main_label_status.setText("NO MATCH")
 			self.loc_button_OK.setEnabled(False)
@@ -74,33 +83,51 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		else:
 			self.main_label_status.setText("")
 
-		items = []
+		# Filling the comboBox with city names found
+		"""the output can have 2 different syntaxes depending 
+		on the city entered :
+		1st syntax : city_name, state, country
+		2nd syntax : city_name, country
+		We first try to catch the 1st syntax and we 
+		except a KeyError to catch the 2nd one """
+		items = [] # list containing the names of homonymous towns
 		for local in data:
 			try:
 				items.append(f"{local['name']}, {local['state'].lower()}, {local['country'].lower()}")
 			except KeyError:
 				items.append(f"{local['name']}, {local['country'].lower()}")
 
-		#print(items)
-		self.loc_combo.addItems(items)
-		self.loc_button_OK.setEnabled(True)
+		self.loc_combo.addItems(items) # Combobox filling
+		self.loc_button_OK.setEnabled(True) # Button OK ON
 	
 	def buttonOK(self):
+		"""Button OK behaviour"""
+
 		self.thd_locValidation = threading.Thread(target=self.loc_validation)
 		self.thd_locValidation.start() 
 
 	def loc_validation(self):
+		""" 
+		- Get the choice from comboBox 
+		- Format it to respect the syntax of the API URL
+		- Runs the wheather requests """
+
 		global locDisplay, locUrl, cityName, run
 
+		# If waiting for updating, the process stops
 		run = False
 		if self.thd_refresh.is_alive():
 			self.thd_refresh.join()
 
+		# Get the comboBox choice
 		loc = self.loc_combo.currentText()
 		locDisplay = loc
 
+		# str fragmentation
 		loc = loc.split(",")
 
+		# Formating for API URL
+		# If syntax : [city_name, state, country]
 		if len(loc) == 3:
 			cityName = loc[0]
 			self.main_label_title.setText(f"WhatsTheWeather in {cityName}")
@@ -111,10 +138,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 			country = loc[2].strip()
 
+			# City name for API URL syntax
 			loc = [name, state, country]
 			loc = ",".join(loc)
 			locUrl = loc
 		
+		# Formating for API URL
+		# If syntax : [city_name, country]
 		if len(loc) == 2:
 			cityName = loc[0]
 			self.main_label_title.setText(f"WhatsTheWeather in {cityName}")
@@ -126,26 +156,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			loc = [name, country]
 			loc = ",".join(loc)
 			locUrl = loc
-		
+
+		# Acquisition of meteorological data, without refreshing
 		self.thd_weather = threading.Thread(target = self.getWeather)
 		self.thd_weather.start()
 
+		# Status message display
 		self.thd_status = threading.Thread(target= self.statusDisplay, args=("get",))
 		self.thd_status.start()
-		#self.status("Getting. . .")
 
+		# Acquisition of meteorological data, with refreshing
 		run = True
 		self.thd_weather.join()
 		self.thd_refresh = threading.Thread(target=self.refresh)
 		self.thd_refresh.start()
 
+		# Enabling weather tabs
 		self.tab_current.setEnabled(True)
 		self.tab_forecast.setEnabled(True)
-
-		#self.tabHub.setCurrentIndex(1)
 	
 	def tempConv(self, temp):
-		#global unitTemp
+		""" Temperature unit converter
+		API unit (input) : Kelvin ("K") """
 
 		if unitTemp == "K":
 			return f"{round(temp)}K"
@@ -153,13 +185,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		elif unitTemp == "C":
 			return f"{round(temp - 273.15)}°C"
 
-		else: # unitTemp == "F" :
-			# (1 K − 273,15) × 9/5 + 32 = -457,9 °F
+		else: # unitTemp == "F"
 			F = (temp - 273.15) * 9/5 + 32
 			return f"{round(F)}F"
 	
 	def windConv(self, wind):
-		#global unitWind
+		""" Wind speed unit converter
+		API unit (input) : m/s ("ms") """
 
 		if unitWind == "ms":
 			return f"{round(wind)} m/s"
@@ -171,6 +203,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			return f"{round(wind * 2.237)} mph"
 	
 	def beaufort(self, wind):
+		""" Convert wind speed (m/s) to a Beaufort scale value """
+
 		if wind < 0.5:
 			number = 0
 			descr = "Calm"
@@ -230,6 +264,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		return number, descr
 
 	def cardinal(self, deg):
+		""" Convert an angle (degree) to a cardinal point """
+
 		if (deg >= 0 and deg <= 22) or (deg >= 338 and deg <= 360):
 			card = "North"
 
@@ -260,6 +296,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		return card
 
 	def getIcon(self, id):
+		""" Display weather icon from an icon ID  """
+
 		icon = QImage()
 		iconUrl = f"http://openweathermap.org/img/wn/{id}@2x.png"
 		icon.loadFromData(requests.get(iconUrl).content)
@@ -267,15 +305,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		return QPixmap(icon)
 	
 	def epochConv(self, epoch, mode = "hr"):
-		if mode == "hr":
+		""" Convert an Unix epoch to a date  """
+
+		if mode == "hr": # Only display hour
 			out = datetime.fromtimestamp(epoch)
 			out = out.strftime("%H:%M")
 
-		if mode == "dt":
+		if mode == "dt": # Only display date
 			out = datetime.fromtimestamp(epoch)
 			out = out.strftime("%d/%m/%Y")
 		
-		if mode == "day":
+		if mode == "day": # Only display week day
 			out = datetime.fromtimestamp(epoch)
 			out = out.weekday()
 
@@ -294,17 +334,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			if out == 6:
 				out = "Sunday"
 		
-		if mode == "all":
+		if mode == "all": # Display all
 			out = datetime.fromtimestamp(epoch)
 			out = out.strftime("%d/%m/%Y-%H:%M")
 		
 		return out
 
 	def currentWeather(self):
+		""" Acquisition of current meteorological data 
+		and widgets updating """
 
 		global lat, lon
-
-		#self.main_label_status.setText("Current weather data acquisition...")
 
 		# - - - - Get json
 		url = f"https://api.openweathermap.org/data/2.5/weather?q={locUrl}&appid={apiKey}"
@@ -321,10 +361,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		data = json.loads(response.text)
 
 		# - - - - - - - - Current time - - - - - - - -
-		""" today = datetime.now()
-		date = today.strftime("%d/%m/%Y")
-		hour = today.strftime("%H:%M") """
-
+		# API time, not system time
 		epoch = data['dt']
 		tz = data['timezone']
 		date = datetime.fromtimestamp(epoch)
@@ -336,7 +373,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		hrlt = hrlt.strftime("%H:%M")
 
 		self.curr_label_recap.setText(f"{locDisplay} - {dt} {hr} (local time : {hrlt})")
-
 
 		# - - - - - - - - Temp frame - - - - - - - -
 		# Current temp
@@ -468,7 +504,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.curr_label_h6_info.setText(f"{temp}\n{wind}")       
 
 	def forecastWeather(self):
-		#self.main_label_status.setText("Forecast weather data acquisition...")
+		""" Acquisition of forecast meteorological data 
+		and widgets updating """
 
 		url = f"https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude=minutely,hourly&appid={apiKey}"
 		response = requests.get(url)
@@ -585,6 +622,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.for_icon_d7.setPixmap(self.getIcon(iconID))
 
 	def verify(self):
+		""" Checking API validity
+		Connect to 'verify' button """
+
 		global apiKey, apiDefault
 
 		inputApi = self.opt_lineEdit_api.text()
@@ -601,6 +641,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.main_label_status.setText("Wrong API key, back to the default one")
 
 	def saveAll(self):
+		""" Save user options, restart an API call 
+		for the acquisition of meteorological data """
+
 		global unitTemp, unitWind, apiKey, run, t_init
 
 		run = False
@@ -641,12 +684,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.thd_refresh.start()
 			
 	def refresh(self):
+		"""Get the weather (current & forecast), with refresh"""
 		
 		t = t_init
 		
-		self.currentWeather()
+		""" self.currentWeather()
 		self.forecastWeather()
-		self.tabHub.setCurrentIndex(1)
+		self.tabHub.setCurrentIndex(1) """
 
 		while run:
 			while t and run:
@@ -666,7 +710,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			t = t_init
 	
 	def getWeather(self):
-		"""Get the weather just once, without refresh"""
+		"""Get the weather just once (curren & forecast), 
+		without refresh"""
 
 		self.thd_status = threading.Thread(target= self.statusDisplay, args=("get",))
 		self.thd_status.start()
@@ -677,6 +722,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.tabHub.setCurrentIndex(1)
 
 	def statusDisplay(self, flag):
+		"""Status messages display"""
+
 		t = 4
 		
 		if flag == "save":
@@ -690,13 +737,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		time.sleep(t)
 		self.main_label_status.setText("")
 
-	def status(self, txt):
-		if self.thd_status.is_alive():
-			self.thd_status.join()
-		
-		self.thd_status = threading.Thread(target=self.statusDisplay, args=(txt,))
-
 	def closeEvent(self, event):
+		""" App closure stops the refresh process """
+
 		global run
 
 		event.accept()
