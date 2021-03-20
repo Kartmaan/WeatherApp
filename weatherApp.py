@@ -1,5 +1,6 @@
 import sys
 import requests
+import socket
 import json
 from datetime import datetime
 import time
@@ -13,7 +14,9 @@ from weather_window import Ui_MainWindow
 __version__ = "1.0"
 __author__ = "Kartmaan"
 
-run = False
+appRun = True
+refreshRun = False # Weather refreshing
+
 t_init = 20*60
 cityName = ""
 locDisplay = ""
@@ -30,15 +33,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		super().__init__()
 		self.setupUi(self)
 
+		self.connectionLost = False
+
 		# - - - - Threads
-		# Updates the weather at regular time intervals
-		self.thd_refresh = threading.Thread(target=self.refresh)
-		# Displaying Status Messages
-		self.thd_status = threading.Thread(target=self.statusDisplay)
-		# Get the weather without refresh (just once)
-		self.thd_weather = threading.Thread(target=self.getWeather)
+		# Connection check
+		self.thd_connectCheck = threading.Thread(target=self.checkConnection)
+		self.thd_connectCheck.start()
+
 		# Localisation validation
 		self.thd_locValidation = threading.Thread(target=self.loc_validation)
+
+		# Get the weather without refresh (just once)
+		self.thd_weather = threading.Thread(target=self.getWeather)
+
+		# Updates the weather at regular time intervals
+		self.thd_refresh = threading.Thread(target=self.refresh)
+
+		# Displaying Status Messages
+		self.thd_status = threading.Thread(target=self.statusDisplay)
 
 		# - - - - Connection of buttons with their function
 		self.loc_button_search.clicked.connect(self.loc_output)
@@ -112,10 +124,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		- Format it to respect the syntax of the API URL
 		- Runs the weather requests """
 
-		global locDisplay, locUrl, cityName, run
+		global locDisplay, locUrl, cityName, refreshRun
 
 		# If waiting for updating, the process stops
-		run = False
+		refreshRun = False
 		if self.thd_refresh.is_alive():
 			self.thd_refresh.join()
 
@@ -166,7 +178,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.thd_status.start()
 
 		# Acquisition of meteorological data, with refreshing
-		run = True
+		refreshRun = True
 		self.thd_weather.join()
 		self.thd_refresh = threading.Thread(target=self.refresh)
 		self.thd_refresh.start()
@@ -644,11 +656,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		""" Save user options, restart an API call 
 		for the acquisition of meteorological data """
 
-		global unitTemp, unitWind, apiKey, run, t_init
+		global unitTemp, unitWind, apiKey, refreshRun, t_init
 
-		run = False
+		refreshRun = False
 		if self.thd_refresh.is_alive():
-			run = False
+			refreshRun = False
 			self.thd_refresh.join()
 
 		if self.opt_radio_celcius.isChecked():
@@ -676,26 +688,82 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.thd_weather = threading.Thread(target=self.getWeather)
 			self.thd_weather.start()
 
-			run = True
+			refreshRun = True
 			self.thd_refresh = threading.Thread(target=self.refresh)
 			self.thd_refresh.start()
+
+	def checkConnection(self, host="8.8.8.8", port=53, timeout=3):
+		global refreshRun
+		backOnline = False
+
+		while appRun:
+			try: # Connection OK
+				socket.setdefaulttimeout(timeout)
+				socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+
+				if backOnline: # Connection reestablished after an outage
+					self.connectionLost = False
+					self.main_label_status.setText("Back online")
+					self.loc_button_OK.setEnabled(True)
+					self.opt_button_saveAll.setEnabled(True)
+					self.opt_button_verify.setEnabled(True)
+
+					#self.thd_refresh.start()
+
+					backOnline = False
+
+				""" if refreshRun == False:
+					refreshRun == True """
+
+			except socket.error as ex: # Connection lost
+				print(ex)
+				""" if self.thd_refresh.is_alive():
+					refreshRun = False
+					self.thd_refresh.join() """
+
+				self.connectionLost = True
+
+				self.loc_button_OK.setEnabled(False)
+				self.opt_button_saveAll.setEnabled(False)
+				self.opt_button_verify.setEnabled(False)
+
+				self.main_label_status.setText("NO CONNECTION")
+				backOnline = True
 			
+			t = 9
+			while t > 0 and appRun:
+				time.sleep(1)
+				t -= 1
+
+	def savedApi(self):
+		# To-do : New API keys saving
+		pass
+
 	def refresh(self):
 		"""Get the weather (current & forecast), with refresh"""
 		
 		t = t_init
 
-		while run:
-			while t and run:
-				if run == False:
+		while refreshRun:
+			while t and refreshRun:
+				if refreshRun == False:
 					break
 				mins, secs = divmod(t, 60)
 				timer = "Next refresh in : {:02d}:{:02d}".format(mins, secs)
 				self.opt_label_countDown.setText(timer)
+
+				""" If the connection is lost, the countdown pauses until 
+				the connection is back. """
+				if self.connectionLost:
+					while True:
+						time.sleep(0.5)
+						if self.connectionLost == False:
+							break
+
 				time.sleep(1)
 				t -= 1
 
-			if run:
+			if refreshRun:
 				self.currentWeather()
 				self.tabHub.setCurrentIndex(1)
 				self.forecastWeather()
@@ -732,12 +800,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def closeEvent(self, event):
 		""" App closure stops the refresh process """
 
-		global run
+		global refreshRun, appRun
 
 		event.accept()
-		run = False
+		refreshRun = False
+		appRun = False
 		if self.thd_refresh.is_alive():
 			self.thd_refresh.join()
+
+		if self.thd_connectCheck.is_alive():
+			self.thd_connectCheck.join()
 
 if __name__ == "__main__":
 	app = QtWidgets.QApplication(sys.argv)
