@@ -1,3 +1,5 @@
 /Api_test
 /weather.ui
 /__pycache__
+/.vscode
+/pycache

@@ -14,25 +14,28 @@ from weather_window import Ui_MainWindow
 __version__ = "1.0"
 __author__ = "Kartmaan"
 
-appRun = True
-refreshRun = False # Weather refreshing
-
-t_init = 20*60
-cityName = ""
-locDisplay = ""
-locUrl = ""
-lat = ""
-lon = ""
-unitTemp = "C" # "C", "F", "K"
-unitWind = "kmh" # "kmh", "ms", "mph"
 apiDefault = "1def0c78689f22035176fc71c68b106c"
-apiKey = "1def0c78689f22035176fc71c68b106c"
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def __init__(self):
 		super().__init__()
 		self.setupUi(self)
 
+		self.apiKey = apiDefault
+
+		self.cityName = ""
+		self.locDisplay = ""
+		self.locUrl = ""
+		self.lat = ""
+		self.lon = ""
+
+		self.unitTemp = "C" # Values : "C", "F", "K"
+		self.unitWind = "kmh" # Values : "kmh", "ms", "mph"
+		
+		self.refreshRun = False # Weather refreshing
+		self.t_init = 20*60 # Refresh interval (min)
+		
+		self.appRun = True
 		self.connectionLost = False
 
 		# - - - - Threads
@@ -81,7 +84,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			return None
 
 		# an API to list the names of homonymous towns
-		url = f"http://api.openweathermap.org/geo/1.0/direct?q={loc}&limit=5&appid={apiKey}"
+		url = f"http://api.openweathermap.org/geo/1.0/direct?q={loc}&limit=5&appid={self.apiKey}"
 
 		response = requests.get(url)
 		data = json.loads(response.text)
@@ -124,16 +127,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		- Format it to respect the syntax of the API URL
 		- Runs the weather requests """
 
-		global locDisplay, locUrl, cityName, refreshRun
-
 		# If waiting for updating, the process stops
-		refreshRun = False
+		self.refreshRun = False
 		if self.thd_refresh.is_alive():
 			self.thd_refresh.join()
 
 		# Get the comboBox choice
 		loc = self.loc_combo.currentText()
-		locDisplay = loc
+		self.locDisplay = loc
 
 		# str fragmentation
 		loc = loc.split(",")
@@ -153,7 +154,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			# City name for API URL syntax
 			loc = [name, state, country]
 			loc = ",".join(loc)
-			locUrl = loc
+			self.locUrl = loc
 		
 		# Formating for API URL
 		# If syntax : [city_name, country]
@@ -167,9 +168,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 			loc = [name, country]
 			loc = ",".join(loc)
-			locUrl = loc
+			self.locUrl = loc
 
-		# Acquisition of meteorological data, without refreshing
+		# Meteorological data acquisition, without refreshing
 		self.thd_weather = threading.Thread(target = self.getWeather)
 		self.thd_weather.start()
 
@@ -178,7 +179,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.thd_status.start()
 
 		# Acquisition of meteorological data, with refreshing
-		refreshRun = True
+		self.refreshRun = True
 		self.thd_weather.join()
 		self.thd_refresh = threading.Thread(target=self.refresh)
 		self.thd_refresh.start()
@@ -191,10 +192,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		""" Temperature unit converter
 		API unit (input) : Kelvin ("K") """
 
-		if unitTemp == "K":
+		if self.unitTemp == "K":
 			return f"{round(temp)}K"
 
-		elif unitTemp == "C":
+		elif self.unitTemp == "C":
 			return f"{round(temp - 273.15)}°C"
 
 		else: # unitTemp == "F"
@@ -205,10 +206,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		""" Wind speed unit converter
 		API unit (input) : m/s ("ms") """
 
-		if unitWind == "ms":
+		if self.unitWind == "ms":
 			return f"{round(wind)} m/s"
 		
-		elif unitWind == "kmh":
+		elif self.unitWind == "kmh":
 			return f"{round(wind * 3.6)} km/h"
 		
 		else: # unitWind == "mph":
@@ -356,10 +357,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		""" Acquisition of current meteorological data 
 		and widgets updating """
 
-		global lat, lon
-
 		# - - - - Get json
-		url = f"https://api.openweathermap.org/data/2.5/weather?q={locUrl}&appid={apiKey}"
+		url = f"https://api.openweathermap.org/data/2.5/weather?q={self.locUrl}&appid={self.apiKey}"
 		response = requests.get(url)
 		code = response.status_code
 
@@ -384,7 +383,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		hrlt = datetime.fromtimestamp(hrlt)
 		hrlt = hrlt.strftime("%H:%M")
 
-		self.curr_label_recap.setText(f"{locDisplay} - {dt} {hr} (local time : {hrlt})")
+		self.curr_label_recap.setText(f"{self.locDisplay} - {dt} {hr} (local time : {hrlt})")
 
 		# - - - - - - - - Temp frame - - - - - - - -
 		# Current temp
@@ -449,9 +448,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		# - - - - - - - - Next hours frame - - - - - - - -
 		# To-Do : If the icon ID is the same as the previous hour, 
 		# there is no need to request the API
-		lat = data['coord']['lat']
-		lon = data['coord']['lon']
-		url = f"https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude=minutely,daily&appid={apiKey}"
+		self.lat = data['coord']['lat']
+		self.lon = data['coord']['lon']
+		url = f"https://api.openweathermap.org/data/2.5/onecall?lat={self.lat}&lon={self.lon}&exclude=minutely,daily&appid={self.apiKey}"
 		response = requests.get(url)
 		data = json.loads(response.text)
 
@@ -519,7 +518,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		""" Acquisition of forecast meteorological data 
 		and widgets updating """
 
-		url = f"https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude=minutely,hourly&appid={apiKey}"
+		url = f"https://api.openweathermap.org/data/2.5/onecall?lat={self.lat}&lon={self.lon}&exclude=minutely,hourly&appid={self.apiKey}"
 		response = requests.get(url)
 		code = response.status_code
 
@@ -637,15 +636,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		""" Checking API validity
 		Connect to 'verify' button """
 
-		global apiKey, apiDefault
-
 		inputApi = self.opt_lineEdit_api.text()
 		url = f"https://api.openweathermap.org/data/2.5/weather?q=Lyon&appid={inputApi}"
 		response = requests.get(url)
 		code = response.status_code
 		
 		if code == 200:
-			apiKey = inputApi
+			self.apiKey = inputApi
 			self.main_label_status.setText("API OK")
 		else:
 			apiKey = apiDefault
@@ -656,47 +653,45 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		""" Save user options, restart an API call 
 		for the acquisition of meteorological data """
 
-		global unitTemp, unitWind, apiKey, refreshRun, t_init
-
-		refreshRun = False
+		self.refreshRun = False
 		if self.thd_refresh.is_alive():
-			refreshRun = False
+			self.refreshRun = False
 			self.thd_refresh.join()
 
 		if self.opt_radio_celcius.isChecked():
-			unitTemp = "C"
+			self.unitTemp = "C"
 		if self.opt_radio_farh.isChecked():
-			unitTemp = "F"
+			self.unitTemp = "F"
 		if self.opt_radio_kelvin.isChecked():
-			unitTemp = "K"
+			self.unitTemp = "K"
 		
 		if self.opt_radio_kmh.isChecked():
-			unitWind = "kmh"
+			self.unitWind = "kmh"
 		if self.opt_radio_ms.isChecked():
-			unitWind = "ms"
+			self.unitWind = "ms"
 		if self.opt_radio_mph.isChecked():
-			unitWind = "mph"
+			self.unitWind = "mph"
 		
-		apiKey = self.opt_lineEdit_api.text()
+		self.apiKey = self.opt_lineEdit_api.text()
 
-		t_init = self.opt_spinBox_refresh.value() * 60
+		self.t_init = self.opt_spinBox_refresh.value() * 60
 
 		self.thd_status = threading.Thread(target=self.statusDisplay, args=("save",))
 		self.thd_status.start()
 
-		if locUrl != "":
+		if self.locUrl != "":
 			self.thd_weather = threading.Thread(target=self.getWeather)
 			self.thd_weather.start()
 
-			refreshRun = True
+			self.refreshRun = True
 			self.thd_refresh = threading.Thread(target=self.refresh)
 			self.thd_refresh.start()
 
 	def checkConnection(self, host="8.8.8.8", port=53, timeout=3):
-		global refreshRun
+		#global refreshRun
 		backOnline = False
 
-		while appRun:
+		while self.appRun:
 			try: # Connection OK
 				socket.setdefaulttimeout(timeout)
 				socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
@@ -731,22 +726,22 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 				backOnline = True
 			
 			t = 9
-			while t > 0 and appRun:
+			while t > 0 and self.appRun:
 				time.sleep(1)
 				t -= 1
 
 	def savedApi(self):
-		# To-do : New API keys saving
+		# To-do : New API keys saving in .txt file
 		pass
 
 	def refresh(self):
 		"""Get the weather (current & forecast), with refresh"""
 		
-		t = t_init
+		t = self.t_init
 
-		while refreshRun:
-			while t and refreshRun:
-				if refreshRun == False:
+		while self.refreshRun:
+			while t and self.refreshRun:
+				if self.refreshRun == False:
 					break
 				mins, secs = divmod(t, 60)
 				timer = "Next refresh in : {:02d}:{:02d}".format(mins, secs)
@@ -763,12 +758,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 				time.sleep(1)
 				t -= 1
 
-			if refreshRun:
+			if self.refreshRun:
 				self.currentWeather()
 				self.tabHub.setCurrentIndex(1)
 				self.forecastWeather()
 				
-			t = t_init
+			t = self.t_init
 	
 	def getWeather(self):
 		"""Get the weather just once (curren & forecast), 
@@ -784,7 +779,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def statusDisplay(self, flag):
 		"""Status messages display"""
 
-		t = 3
+		t = 3 # Display time (sec)
 		
 		if flag == "save":
 			txt = "Preferences have been saved"
@@ -800,11 +795,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 	def closeEvent(self, event):
 		""" App closure stops the refresh process """
 
-		global refreshRun, appRun
-
 		event.accept()
-		refreshRun = False
-		appRun = False
+		self.refreshRun = False
+		self.appRun = False
 		if self.thd_refresh.is_alive():
 			self.thd_refresh.join()
 
