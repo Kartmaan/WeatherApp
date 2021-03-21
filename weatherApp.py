@@ -5,6 +5,7 @@ import json
 from datetime import datetime
 import time
 import threading
+import pickle
 
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QImage, QPixmap
@@ -66,6 +67,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.loc_button_OK.setEnabled(False) # Button OK off
 		self.tab_current.setEnabled(False) # Current weather off
 		self.tab_forecast.setEnabled(False) # Forecast off
+
+		self.loadSave()
 
 	def loc_output(self):
 		""" Get location input and fill the comboBox.
@@ -632,7 +635,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.for_label_d7_descr.setText(descr)
 		self.for_icon_d7.setPixmap(self.getIcon(iconID))
 
-	def verify(self):
+	def verify(self, mode = 1):
 		""" Checking API validity
 		Connect to 'verify' button """
 
@@ -643,11 +646,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		
 		if code == 200:
 			self.apiKey = inputApi
-			self.main_label_status.setText("API OK")
+			if mode == 1:
+				self.main_label_status.setText("API OK")
+			if mode == 2:
+				#self.main_label_status.setText("API OK")
+				return True
 		else:
 			apiKey = apiDefault
 			self.opt_lineEdit_api.setText(apiKey)
 			self.main_label_status.setText("Wrong API key, back to the default one")
+			if mode == 2:
+				return False
 
 	def saveAll(self):
 		""" Save user options, restart an API call 
@@ -673,8 +682,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			self.unitWind = "mph"
 		
 		self.apiKey = self.opt_lineEdit_api.text()
+		self.verify(mode = 2)
 
 		self.t_init = self.opt_spinBox_refresh.value() * 60
+
+		self.storeSave()
 
 		self.thd_status = threading.Thread(target=self.statusDisplay, args=("save",))
 		self.thd_status.start()
@@ -730,9 +742,51 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 				time.sleep(1)
 				t -= 1
 
-	def savedApi(self):
+	def storeSave(self):
 		# To-do : New API keys saving in .txt file
-		pass
+		apiKey = self.apiKey
+		temp = self.unitTemp
+		wind = self.unitWind
+		timer = self.opt_spinBox_refresh.value()
+
+		save = {"apiKey" : apiKey, "temp" : temp, "wind" : wind, "timer" : timer}
+
+		svFile = open('saveFile', 'wb')
+
+		pickle.dump(save, svFile)
+		svFile.close()
+	
+	def loadSave(self):
+		try :
+			svFile = open('saveFile', 'rb')
+			save = pickle.load(svFile)
+			svFile.close()
+
+			self.apiKey = save['apiKey']
+			self.opt_lineEdit_api.setText(save['apiKey'])
+
+			self.unitTemp = save['temp']
+			if save['temp'] == "C":
+				self.opt_radio_celcius.setChecked(True)
+			if save['temp'] == "F":
+				self.opt_radio_farh.setChecked(True)
+			if save['temp'] == "K":
+				self.opt_radio_kelvin.setChecked(True)
+
+			self.unitWind = save['wind']
+			if save['wind'] == "kmh":
+				self.opt_radio_kmh.setChecked(True)
+			if save['wind'] == "ms":
+				self.opt_radio_ms.setChecked(True)
+			if save['wind'] == "mph":
+				self.opt_radio_mph.setChecked(True)
+
+			self.t_init = save['timer'] * 60
+			self.opt_spinBox_refresh.setValue(save['timer'])
+
+		except FileNotFoundError:
+			self.apiKey = apiDefault
+			pass
 
 	def refresh(self):
 		"""Get the weather (current & forecast), with refresh"""
