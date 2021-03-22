@@ -1150,7 +1150,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "WhatsTheWeather"))
         self.loc_button_search.setText(_translate("MainWindow", "Search"))
-        self.loc_label_enter_location.setText(_translate("MainWindow", "Enter a location"))
+        self.loc_label_enter_location.setText(_translate("MainWindow", "Enter a city name"))
         self.loc_button_OK.setText(_translate("MainWindow", "OK"))
         self.loc_label_choose_location.setText(_translate("MainWindow", "Choose a location"))
         self.tabHub.setTabText(self.tabHub.indexOf(self.tab_location), _translate("MainWindow", "Location"))
