@@ -636,23 +636,26 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.for_icon_d7.setPixmap(self.getIcon(iconID))
 
 	def verify(self, mode = 1):
-		""" Checking API validity
-		Connect to 'verify' button """
+		""" Checking API key validity
+		The function has 2 modes:
+		- Mode 1 = function started by the 'verify' button
+		- Mode 2 = function launched from another function, 
+		returns True if the API key is valid, False otherwise """
 
-		inputApi = self.opt_lineEdit_api.text()
+		inputApi = self.opt_lineEdit_api.text() # Inserted API key
 		url = f"https://api.openweathermap.org/data/2.5/weather?q=Lyon&appid={inputApi}"
 		response = requests.get(url)
 		code = response.status_code
 		
-		if code == 200:
+		if code == 200: # Valid API key
 			self.apiKey = inputApi
 			if mode == 1:
 				self.main_label_status.setText("API OK")
 			if mode == 2:
 				#self.main_label_status.setText("API OK")
 				return True
-		else:
-			apiKey = apiDefault
+		else: # Wrong API key
+			apiKey = apiDefault # Back to the default API key
 			self.opt_lineEdit_api.setText(apiKey)
 			self.main_label_status.setText("Wrong API key, back to the default one")
 			if mode == 2:
@@ -660,13 +663,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 	def saveAll(self):
 		""" Save user options, restart an API call 
-		for the acquisition of meteorological data """
+		for the acquisition of meteorological data.
+		Connected to 'save all' button """
 
+		""" If the weather is pending update, 
+		the pending is canceled """
 		self.refreshRun = False
 		if self.thd_refresh.is_alive():
 			self.refreshRun = False
 			self.thd_refresh.join()
 
+		# Temperature units radio buttons
 		if self.opt_radio_celcius.isChecked():
 			self.unitTemp = "C"
 		if self.opt_radio_farh.isChecked():
@@ -674,6 +681,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		if self.opt_radio_kelvin.isChecked():
 			self.unitTemp = "K"
 		
+		# Wind speed units radio buttons
 		if self.opt_radio_kmh.isChecked():
 			self.unitWind = "kmh"
 		if self.opt_radio_ms.isChecked():
@@ -681,29 +689,42 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		if self.opt_radio_mph.isChecked():
 			self.unitWind = "mph"
 		
+		# Api key verification
+		# Set new API key if OK
 		self.apiKey = self.opt_lineEdit_api.text()
-		self.verify(mode = 2)
+		if self.verify(mode = 2) == False :
+			return None
+		else:
+			pass
 
+		# Get & set the refresh value from spinBox
 		self.t_init = self.opt_spinBox_refresh.value() * 60
 
-		self.storeSave()
+		self.storeSave() # Preferences save
 
+		# Status message display
 		self.thd_status = threading.Thread(target=self.statusDisplay, args=("save",))
 		self.thd_status.start()
 
+		# Start the meteorological data acquisition
 		if self.locUrl != "":
+			# Get weather once
 			self.thd_weather = threading.Thread(target=self.getWeather)
 			self.thd_weather.start()
 
+			# Start the refresh countdown
 			self.refreshRun = True
 			self.thd_refresh = threading.Thread(target=self.refresh)
 			self.thd_refresh.start()
 
 	def checkConnection(self, host="8.8.8.8", port=53, timeout=3):
-		#global refreshRun
+		""" Regularly check the connection status.
+		To do this, a regular connection is established 
+		with the Google DNS (8.8.8.8) """
+		
 		backOnline = False
 
-		while self.appRun:
+		while self.appRun: # As long as the program runs
 			try: # Connection OK
 				socket.setdefaulttimeout(timeout)
 				socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
@@ -715,19 +736,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 					self.opt_button_saveAll.setEnabled(True)
 					self.opt_button_verify.setEnabled(True)
 
-					#self.thd_refresh.start()
-
 					backOnline = False
 
-				""" if refreshRun == False:
-					refreshRun == True """
-
 			except socket.error as ex: # Connection lost
-				print(ex)
-				""" if self.thd_refresh.is_alive():
-					refreshRun = False
-					self.thd_refresh.join() """
+				""" A connection cut has the effect of 
+				deactivating certain buttons and pausing the refresh 
+				countdown (self.refresh). """
 
+				print(ex)
 				self.connectionLost = True
 
 				self.loc_button_OK.setEnabled(False)
@@ -737,34 +753,45 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 				self.main_label_status.setText("NO CONNECTION")
 				backOnline = True
 			
+			# Time interval between two checks
 			t = 9
 			while t > 0 and self.appRun:
 				time.sleep(1)
 				t -= 1
 
 	def storeSave(self):
-		# To-do : New API keys saving in .txt file
+		""" Get the user preferences and store it 
+		in a binary file (pickle) """
+		
+		# Get all user preferences
 		apiKey = self.apiKey
 		temp = self.unitTemp
 		wind = self.unitWind
 		timer = self.opt_spinBox_refresh.value()
 
+		# Putting the preferences in a dict
 		save = {"apiKey" : apiKey, "temp" : temp, "wind" : wind, "timer" : timer}
 
 		svFile = open('saveFile', 'wb')
 
-		pickle.dump(save, svFile)
+		pickle.dump(save, svFile) # Write the binary file
 		svFile.close()
 	
 	def loadSave(self):
+		""" Loads user preferences from a binary file (pickle)
+		and sets them """
+
 		try :
+			# Open file and load the dict (save)
 			svFile = open('saveFile', 'rb')
 			save = pickle.load(svFile)
 			svFile.close()
 
+			# Get/set API key
 			self.apiKey = save['apiKey']
 			self.opt_lineEdit_api.setText(save['apiKey'])
 
+			# Get/set temp unit
 			self.unitTemp = save['temp']
 			if save['temp'] == "C":
 				self.opt_radio_celcius.setChecked(True)
@@ -773,6 +800,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			if save['temp'] == "K":
 				self.opt_radio_kelvin.setChecked(True)
 
+			# Get/set wind unit
 			self.unitWind = save['wind']
 			if save['wind'] == "kmh":
 				self.opt_radio_kmh.setChecked(True)
@@ -781,6 +809,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 			if save['wind'] == "mph":
 				self.opt_radio_mph.setChecked(True)
 
+			# Get/set refresh timer
 			self.t_init = save['timer'] * 60
 			self.opt_spinBox_refresh.setValue(save['timer'])
 
@@ -801,8 +830,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 				timer = "Next refresh in : {:02d}:{:02d}".format(mins, secs)
 				self.opt_label_countDown.setText(timer)
 
-				""" If the connection is lost, the countdown pauses until 
-				the connection is back. """
+				""" If the connection is lost, the countdown 
+				pauses until the connection is back. """
 				if self.connectionLost:
 					while True:
 						time.sleep(0.5)
@@ -812,17 +841,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 				time.sleep(1)
 				t -= 1
 
+			# End of countdown
 			if self.refreshRun:
 				self.currentWeather()
 				self.tabHub.setCurrentIndex(1)
 				self.forecastWeather()
-				
+			
+			# Resetting the countdown timer
 			t = self.t_init
 	
 	def getWeather(self):
 		"""Get the weather just once (curren & forecast), 
 		without refresh"""
 
+		# Status message display
 		self.thd_status = threading.Thread(target= self.statusDisplay, args=("get",))
 		self.thd_status.start()
 
@@ -831,7 +863,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.tabHub.setCurrentIndex(1)
 
 	def statusDisplay(self, flag):
-		"""Status messages display"""
+		""" Status messages display.
+		Function started from a thread """
 
 		t = 3 # Display time (sec)
 		
@@ -847,11 +880,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 		self.main_label_status.setText("")
 
 	def closeEvent(self, event):
-		""" App closure stops the refresh process """
+		""" App closure stops :
+		- the refresh process
+		- the connection check process """
 
 		event.accept()
 		self.refreshRun = False
 		self.appRun = False
+
 		if self.thd_refresh.is_alive():
 			self.thd_refresh.join()
 
