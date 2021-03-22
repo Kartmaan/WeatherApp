@@ -41,3 +41,7 @@ A PyQt5 graphical weather application using OpenWeatherMap API, the program retr
 - A countdown is displayed in the option tab allowing to know when the next refresh will take place
 - A 'verify' button is used to verify the validity of an API key before saving the parameters
 - A rectangular zone at the bottom of the window is used to display the status messages
+
+## Required
+- PyQt5
+- Python 3.8
