@@ -4,7 +4,7 @@ A PyQt5 graphical weather application using OpenWeatherMap API, the program retr
 ## What does the program do ? :
 - Finds the city name entered by the user as well as its namesakes
 
-- Displays current weather data for the location :
+- Displays current weather data for the choosen location :
   - Current temperature with a description and an icon
   - Feels like temperature
   - Max/min temperature
@@ -17,7 +17,7 @@ A PyQt5 graphical weather application using OpenWeatherMap API, the program retr
   - Sunrise/sunset time
   - Next hours weather (6h) with hours, icons, temperatures and wind speeds
   
-- Displays forecast weather data for the location (7 days). For each day :
+- Displays forecast weather data for the choosen location (7 days). For each day :
   - Week day
   - Min/max temperature
   - Weather description
