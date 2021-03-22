@@ -833,7 +833,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 				""" If the connection is lost, the countdown 
 				pauses until the connection is back. """
 				if self.connectionLost:
-					while True:
+					while True and self.appRun:
 						time.sleep(0.5)
 						if self.connectionLost == False:
 							break
