@@ -37,14 +37,6 @@ class Ui_MainWindow(object):
         self.loc_button_search.setGeometry(QtCore.QRect(540, 60, 191, 51))
         self.loc_button_search.setObjectName("loc_button_search")
 
-        # Label searching...
-        """ self.loc_label_searching = QtWidgets.QLabel(self.tab_location)
-        self.loc_label_searching.setGeometry(QtCore.QRect(760, 74, 81, 20))
-        font = QtGui.QFont()
-        font.setPointSize(11)
-        self.loc_label_searching.setFont(font)
-        self.loc_label_searching.setObjectName("loc_label_searching") """
-
         # Label Enter location
         self.loc_label_enter_location = QtWidgets.QLabel(self.tab_location)
         self.loc_label_enter_location.setGeometry(QtCore.QRect(120, 30, 301, 20))
@@ -82,15 +74,6 @@ class Ui_MainWindow(object):
         self.loc_label_choose_location.setFont(font)
         self.loc_label_choose_location.setAlignment(QtCore.Qt.AlignCenter)
         self.loc_label_choose_location.setObjectName("loc_label_choose_location")
-
-        # Label getting...
-        """ self.loc_label_getting = QtWidgets.QLabel(self.loc_frame_choose)
-        self.loc_label_getting.setGeometry(QtCore.QRect(280, 150, 81, 20))
-        font = QtGui.QFont()
-        font.setPointSize(11)
-        self.loc_label_getting.setFont(font)
-        self.loc_label_getting.setAlignment(QtCore.Qt.AlignCenter)
-        self.loc_label_getting.setObjectName("loc_label_getting") """
 
         # Horizontal line
         self.loc_line = QtWidgets.QFrame(self.tab_location)
@@ -1167,11 +1150,9 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "WhatsTheWeather"))
         self.loc_button_search.setText(_translate("MainWindow", "Search"))
-        #self.loc_label_searching.setText(_translate("MainWindow", "Searching..."))
         self.loc_label_enter_location.setText(_translate("MainWindow", "Enter a location"))
         self.loc_button_OK.setText(_translate("MainWindow", "OK"))
         self.loc_label_choose_location.setText(_translate("MainWindow", "Choose a location"))
-        #self.loc_label_getting.setText(_translate("MainWindow", "Getting..."))
         self.tabHub.setTabText(self.tabHub.indexOf(self.tab_location), _translate("MainWindow", "Location"))
 
 
